@@ -34,6 +34,8 @@ Console.WriteLine("Kernel Oluşturuluyor...");
 IKernelBuilder builder = Kernel.CreateBuilder();
 
 
+//builder.AddAzureOpenAIChatCompletion(apiKey: "api-key", deploymentName: "your-deployment-name", endpoint: "endpoint");
+
 builder
     .AddOpenAIChatCompletion(
         modelId: modelId,
