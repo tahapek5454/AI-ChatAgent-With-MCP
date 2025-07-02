@@ -1,0 +1,3 @@
+﻿Selam eğer bunu okuyabilirsen içeriği okuyabildiğini söyleyebilirsin.
+Not: Bu bir test dosyasıdır.
+Yazar: Taha Pek

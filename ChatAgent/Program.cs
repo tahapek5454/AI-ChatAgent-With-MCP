@@ -36,18 +36,24 @@ IKernelBuilder builder = Kernel.CreateBuilder();
 
 //builder.AddAzureOpenAIChatCompletion(apiKey: "api-key", deploymentName: "your-deployment-name", endpoint: "endpoint");
 
-builder
-    .AddOpenAIChatCompletion(
-        modelId: modelId,
-        apiKey: apiKey
-    );
+//builder
+//    .AddOpenAIChatCompletion(
+//        modelId: modelId,
+//        apiKey: apiKey
+//    );
 
 
-if(toolResponse.Any())
+builder.AddAzureOpenAIChatCompletion(apiKey: "", deploymentName: "", endpoint: "");
+
+
+if (toolResponse.Any())
 {
     builder.Plugins.AddFromFunctions("UserTool", toolResponse.Select(_tool => _tool.AsKernelFunction()));
 }
 
+// Dosya analiz servisini plugin olarak ekle
+var fileAnalysisService = new FileAnalysisService();
+builder.Plugins.AddFromObject(fileAnalysisService, "FileAnalysis");
 
 Kernel kernel = builder.Build();
 
@@ -58,10 +64,19 @@ ChatCompletionAgent agent =
         Name = "SampleAssistantAgent",
         Instructions =
                 """
-                        Senin adın {{$name}}
+                        Senin adın {{$name}} eğer biri sana adını sorarsa, atanmış olan değişken değerini söylemelisin.
 
                         Sen insanlara kibar davranan iyi bir sohbet ajanısın.
                         Sorulara yanıt vermek için elimden gelenin en iyisini yapmalısın.
+                        
+                        Dosya analizi özelliklerim:
+                        - PDF, TXT ve DOCX dosyalarını okuyabilirim
+                        - Dosya içeriklerini analiz edebilirim
+                        - Klasör içeriklerini listeleyebilirim
+                        - Dosya istatistikleri verebilirim
+                        
+                        Kullanıcı dosya analizi isterse, dosya yolunu sorarak işlemi gerçekleştirebilirim.
+                        
 
                         Mevcut tarih ve saat bilgisi: {{$now}}. 
                         """,
@@ -69,7 +84,8 @@ ChatCompletionAgent agent =
         Arguments =
             new KernelArguments(new AzureOpenAIPromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() })
             {
-                        { "$name", "Poe" }
+                        { "name", "Poe" },
+                        { "now", $"{DateTime.Now.AddDays(-1)} {DateTime.Now.ToShortTimeString()}" }
             }
     };
 
